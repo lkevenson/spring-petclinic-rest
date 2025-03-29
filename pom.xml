@@ -333,6 +333,10 @@
                 <version>4.5.0-M6</version>
                 <configuration>
                     <repoToken>XRXNTzCNkpe8gvgksuzJsOGjWC0dvGRND</repoToken>
+                    <sourceDirectories>
+                        <sourceDirectory>${basedir}/src/main/java</sourceDirectory>
+                        <sourceDirectory>${project.build.directory}/generated-sources/annotations</sourceDirectory>
+                    </sourceDirectories>
                 </configuration>
             </plugin>
 
