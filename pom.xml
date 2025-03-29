@@ -180,41 +180,67 @@
             <artifactId>jaxb-api</artifactId>
             <version>${jaxb-api.version}</version>
         </dependency>
+
+        <!-- JUnit for Testing -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- JaCoCo for Test Coverage -->
+        <dependency>
+            <groupId>org.jacoco</groupId>
+            <artifactId>org.jacoco.agent</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- SonarQube Plugin -->
+        <dependency>
+            <groupId>org.sonarsource.scanner.maven</groupId>
+            <artifactId>sonar-maven-plugin</artifactId>
+        </dependency>
+
     </dependencies>
 
-<!--    <profiles>-->
-<!--        <profile>-->
-<!--            <id>coverage</id>-->
-<!--            <build>-->
-<!--                <plugins>-->
-<!--                    <plugin>-->
-<!--                        <groupId>org.jacoco</groupId>-->
-<!--                        <artifactId>jacoco-maven-plugin</artifactId>-->
-<!--                        <version>0.8.8</version>-->
-<!--                        <executions>-->
-<!--                            <execution>-->
-<!--                                <id>prepare-agent</id>-->
-<!--                                <goals>-->
-<!--                                    <goal>prepare-agent</goal>-->
-<!--                                </goals>-->
-<!--                            </execution>-->
-<!--                            <execution>-->
-<!--                                <id>report</id>-->
-<!--                                <goals>-->
-<!--                                    <goal>report</goal>-->
-<!--                                </goals>-->
-<!--                                <configuration>-->
-<!--                                    <formats>-->
-<!--                                        <format>XML</format>-->
-<!--                                    </formats>-->
-<!--                                </configuration>-->
-<!--                            </execution>-->
-<!--                        </executions>-->
-<!--                    </plugin>-->
-<!--                </plugins>-->
-<!--            </build>-->
-<!--        </profile>-->
-<!--    </profiles>-->
+    <!--    <profiles>-->
+    <!--        <profile>-->
+    <!--            <id>coverage</id>-->
+    <!--            <build>-->
+    <!--                <plugins>-->
+    <!--                    <plugin>-->
+    <!--                        <groupId>org.jacoco</groupId>-->
+    <!--                        <artifactId>jacoco-maven-plugin</artifactId>-->
+    <!--                        <version>0.8.8</version>-->
+    <!--                        <executions>-->
+    <!--                            <execution>-->
+    <!--                                <id>prepare-agent</id>-->
+    <!--                                <goals>-->
+    <!--                                    <goal>prepare-agent</goal>-->
+    <!--                                </goals>-->
+    <!--                            </execution>-->
+    <!--                            <execution>-->
+    <!--                                <id>report</id>-->
+    <!--                                <goals>-->
+    <!--                                    <goal>report</goal>-->
+    <!--                                </goals>-->
+    <!--                                <configuration>-->
+    <!--                                    <formats>-->
+    <!--                                        <format>XML</format>-->
+    <!--                                    </formats>-->
+    <!--                                </configuration>-->
+    <!--                            </execution>-->
+    <!--                        </executions>-->
+    <!--                    </plugin>-->
+    <!--                </plugins>-->
+    <!--            </build>-->
+    <!--        </profile>-->
+    <!--    </profiles>-->
 
     <reporting>
         <plugins>
@@ -267,18 +293,18 @@
                     <showDetails>true</showDetails>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <reportSets>
-                    <reportSet>
-                        <id>report</id>
-                        <reports>
-                            <report>report</report>
-                        </reports>
-                    </reportSet>
-                </reportSets>
-            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.jacoco</groupId>-->
+<!--                <artifactId>jacoco-maven-plugin</artifactId>-->
+<!--                <reportSets>-->
+<!--                    <reportSet>-->
+<!--                        <id>report</id>-->
+<!--                        <reports>-->
+<!--                            <report>report</report>-->
+<!--                        </reports>-->
+<!--                    </reportSet>-->
+<!--                </reportSets>-->
+<!--            </plugin>-->
         </plugins>
     </reporting>
 
@@ -305,64 +331,86 @@
                 </executions>
             </plugin>
 
+            <!-- JaCoCo Plugin for Code Coverage -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${maven.jacoco-plugin.version}</version>
-                <configuration>
-                    <excludes>
-                        <!-- Generated code -->
-                        <exclude>**/org/springframework/samples/petclinic/rest/dto/**</exclude>
-                        <exclude>**/org/springframework/samples/petclinic/rest/api/**</exclude>
-                    </excludes>
-                </configuration>
+                <version>0.8.8</version>
                 <executions>
                     <execution>
-                        <id>prepare-agent</id>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
                     </execution>
                     <execution>
-                        <id>check</id>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                        <configuration>
-                            <rules>
-                                <rule>
-                                    <element>BUNDLE</element>
-                                    <limits>
-                                        <limit>
-                                            <counter>LINE</counter>
-                                            <value>COVEREDRATIO</value>
-                                            <minimum>0.85</minimum>
-                                        </limit>
-                                        <limit>
-                                            <counter>BRANCH</counter>
-                                            <value>COVEREDRATIO</value>
-                                            <minimum>0.66</minimum>
-                                        </limit>
-                                    </limits>
-                                </rule>
-                            </rules>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>report</id>
+                        <phase>verify</phase>
                         <goals>
                             <goal>report</goal>
                         </goals>
-                        <configuration>
-                            <formats>
-                                <!-- XML format for SonarCloud -->
-                                <!-- https://docs.sonarsource.com/sonarqube-cloud/enriching/test-coverage/java-test-coverage/ -->
-                                <format>XML</format>
-                            </formats>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
+
+
+            <!--            <plugin>-->
+<!--                <groupId>org.jacoco</groupId>-->
+<!--                <artifactId>jacoco-maven-plugin</artifactId>-->
+<!--                <version>${maven.jacoco-plugin.version}</version>-->
+<!--                <configuration>-->
+<!--                    <excludes>-->
+<!--                        &lt;!&ndash; Generated code &ndash;&gt;-->
+<!--                        <exclude>**/org/springframework/samples/petclinic/rest/dto/**</exclude>-->
+<!--                        <exclude>**/org/springframework/samples/petclinic/rest/api/**</exclude>-->
+<!--                    </excludes>-->
+<!--                </configuration>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>prepare-agent</id>-->
+<!--                        <goals>-->
+<!--                            <goal>prepare-agent</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                    <execution>-->
+<!--                        <id>check</id>-->
+<!--                        <goals>-->
+<!--                            <goal>check</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <rules>-->
+<!--                                <rule>-->
+<!--                                    <element>BUNDLE</element>-->
+<!--                                    <limits>-->
+<!--                                        <limit>-->
+<!--                                            <counter>LINE</counter>-->
+<!--                                            <value>COVEREDRATIO</value>-->
+<!--                                            <minimum>0.85</minimum>-->
+<!--                                        </limit>-->
+<!--                                        <limit>-->
+<!--                                            <counter>BRANCH</counter>-->
+<!--                                            <value>COVEREDRATIO</value>-->
+<!--                                            <minimum>0.66</minimum>-->
+<!--                                        </limit>-->
+<!--                                    </limits>-->
+<!--                                </rule>-->
+<!--                            </rules>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                    <execution>-->
+<!--                        <id>report</id>-->
+<!--                        <goals>-->
+<!--                            <goal>report</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <formats>-->
+<!--                                &lt;!&ndash; XML format for SonarCloud &ndash;&gt;-->
+<!--                                &lt;!&ndash; https://docs.sonarsource.com/sonarqube-cloud/enriching/test-coverage/java-test-coverage/ &ndash;&gt;-->
+<!--                                <format>XML</format>-->
+<!--                            </formats>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
 
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
@@ -385,19 +433,6 @@
                 <version>5.1.0.4751</version>
             </plugin>
 
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.8</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                            <goal>report</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
 
 
 
