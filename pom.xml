@@ -48,10 +48,7 @@
         <!-- SonarQube configuration -->
         <sonar.organization>lkevenson</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-
-        <properties>
-            <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-        </properties>
+        <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 
     </properties>
 
