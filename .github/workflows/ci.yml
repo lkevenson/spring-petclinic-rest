@@ -63,8 +63,12 @@ jobs:
         - name: Build and analyze
           env:
             SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          run:
-            mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=lkevenson_spring-petclinic-rest
+          run: |
+            ./mvnw verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+              -Dsonar.projectKey=lkevenson_spring-petclinic-rest \
+              -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+#          run:
+#            mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=lkevenson_spring-petclinic-rest
 
 #    name: Analyze with SonarQube
 #    runs-on: ubuntu-latest
