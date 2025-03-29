@@ -300,18 +300,7 @@
                     <showDetails>true</showDetails>
                 </configuration>
             </plugin>
-            <!--            <plugin>-->
-            <!--                <groupId>org.jacoco</groupId>-->
-            <!--                <artifactId>jacoco-maven-plugin</artifactId>-->
-            <!--                <reportSets>-->
-            <!--                    <reportSet>-->
-            <!--                        <id>report</id>-->
-            <!--                        <reports>-->
-            <!--                            <report>report</report>-->
-            <!--                        </reports>-->
-            <!--                    </reportSet>-->
-            <!--                </reportSets>-->
-            <!--            </plugin>-->
+
         </plugins>
     </reporting>
 
@@ -338,31 +327,14 @@
                 </executions>
             </plugin>
 
-            <!-- JaCoCo Plugin for Code Coverage -->
-            <!--            <plugin>-->
-            <!--                <groupId>org.jacoco</groupId>-->
-            <!--                <artifactId>jacoco-maven-plugin</artifactId>-->
-            <!--                <version>0.8.8</version>-->
-            <!--                <executions>-->
-            <!--                    <execution>-->
-            <!--                        <id>prepare-agent</id>-->
-            <!--                        <goals>-->
-            <!--                            <goal>prepare-agent</goal>-->
-            <!--                        </goals>-->
-            <!--                    </execution>-->
-            <!--                    <execution>-->
-            <!--                        <id>report</id>-->
-            <!--                        <goals>-->
-            <!--                            <goal>report</goal>-->
-            <!--                        </goals>-->
-            <!--                        <configuration>-->
-            <!--                            <formats>-->
-            <!--                                <format>XML</format>-->
-            <!--                            </formats>-->
-            <!--                        </configuration>-->
-            <!--                    </execution>-->
-            <!--                </executions>-->
-            <!--            </plugin>-->
+            <plugin>
+                <groupId>com.github.hazendaz.maven</groupId>
+                <artifactId>coveralls-maven-plugin</artifactId>
+                <version>4.5.0-M6</version>
+                <configuration>
+                    <repoToken>yourcoverallsprojectrepositorytoken</repoToken>
+                </configuration>
+            </plugin>
 
 
             <plugin>
