@@ -2,7 +2,7 @@
 
 Please check if your PR fulfills the following requirements:
 
-- [ ] The commit message follows our guidelines: [Spring Petclinic Commit Message Guidelines](https://github.com/spring-petclinic/spring-petclinic-rest/blob/main/CONTRIBUTING.md)
+- [ ] The commit message follows our guidelines: [Spring Petclinic Commit Message Guidelines](https://github.com/spring-petclinic/spring-petclinic-rest/blob/master/readme.md)
 - [ ] All tests are passing (unit, integration, and end-to-end tests where applicable).
 - [ ] Tests for the changes have been added (for bug fixes / features).
 - [ ] Docs have been added / updated (for bug fixes / features).
