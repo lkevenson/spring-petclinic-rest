@@ -64,11 +64,23 @@ jobs:
           env:
             SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           run: |
-            ./mvnw verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-              -Dsonar.projectKey=lkevenson_spring-petclinic-rest \
-              -Dsonar.coverage.jacoco.xmlReportPaths= \
-               ../app-it/target/site/jacoco-aggregate/jacoco.xml \
-               org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Pcoverage
+            mvn -B clean verify \
+                org.jacoco:jacoco-maven-plugin:prepare-agent \
+                sonar:sonar \
+                -Dsonar.projectKey=lkevenson_spring-petclinic-rest \
+                -Dsonar.organization=lkevenson \
+                -Dsonar.host.url=https://sonarcloud.io \
+                -Dsonar.sources=src/main/java \
+                -Dsonar.tests=src/test/java \
+                -Dsonar.java.binaries=target/classes \
+                -Dsonar.java.libraries=target/*.jar \
+                -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+#          run: |
+#            ./mvnw verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+#              -Dsonar.projectKey=lkevenson_spring-petclinic-rest \
+#              -Dsonar.coverage.jacoco.xmlReportPaths= \
+#               ../app-it/target/site/jacoco-aggregate/jacoco.xml \
+#               org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Pcoverage
 #          run:
 #            mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=lkevenson_spring-petclinic-rest
 
