@@ -47,7 +47,7 @@ jobs:
           uses: actions/setup-java@v4
           with:
             java-version: 17
-            distribution: 'zulu' # Alternative distribution options are available.
+            distribution: 'temurin' # Alternative distribution options are available.
         - name: Cache SonarQube packages
           uses: actions/cache@v4
           with:
@@ -78,16 +78,18 @@ jobs:
           run: |
             mvn clean install
             
-            mvn -B sonar:sonar \
+            mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
                 -Dsonar.projectKey=lkevenson_spring-petclinic-rest \
                 -Dsonar.organization=lkevenson \
                 -Dsonar.host.url=https://sonarcloud.io \
                 -Dsonar.sources=src/main/java \
                 -Dsonar.tests=src/test/java \
                 -Dsonar.java.binaries=target/classes \
+                -Dsonar.java.libraries=target/*.jar \
                 -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
             
-            mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Pcoverage
+            
+#            mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Pcoverage
 #          run:
 #            mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=lkevenson_spring-petclinic-rest
 
