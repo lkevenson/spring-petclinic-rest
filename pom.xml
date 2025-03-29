@@ -47,6 +47,7 @@
 
         <!-- SonarQube configuration -->
         <sonar.organization>lkevenson</sonar.organization>
+        <sonar.projectKey>lkevenson_spring-petclinic-rest</sonar.projectKey>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.coverage.jacoco.xmlReportPaths>
             target/site/jacoco/jacoco.xml
