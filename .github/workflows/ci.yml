@@ -42,12 +42,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: 17
-          distribution: 'zulu' # Alternative distribution options are available.
+          distribution: 'temurin'
       - name: Cache SonarQube packages
         uses: actions/cache@v4
         with:
@@ -63,4 +63,8 @@ jobs:
       - name: Build and analyze
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=lkevenson_spring-petclinic-rest -Pcoverage
+        run: |
+          mvn -B verify org.jacoco:jacoco-maven-plugin:prepare-agent install -Pcoverage
+          mvn -B sonar:sonar \
+              -Dsonar.projectKey=lkevenson_spring-petclinic-rest \
+              -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
