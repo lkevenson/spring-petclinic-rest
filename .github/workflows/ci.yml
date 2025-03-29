@@ -60,9 +60,13 @@ jobs:
             path: ~/.m2
             key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
             restore-keys: ${{ runner.os }}-m2
-        - name: Build and analyze
+        - name: Build
+          run: mmvn clean install
+
+        - name: Analyze
           env:
             SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          run : mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=lkevenson_spring-petclinic-rest
 #          run: |
 #            mvn -B clean verify \
 #                org.jacoco:jacoco-maven-plugin:prepare-agent \
@@ -75,20 +79,20 @@ jobs:
 #                -Dsonar.java.binaries=target/classes \
 #                -Dsonar.java.libraries=target/*.jar \
 #                -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
-          run: |
-            mvn clean install
-            
-            mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-                -Dsonar.projectKey=lkevenson_spring-petclinic-rest \
-                -Dsonar.organization=lkevenson \
-                -Dsonar.host.url=https://sonarcloud.io \
-                -Dsonar.sources=src/main/java \
-                -Dsonar.tests=src/test/java \
-                -Dsonar.java.binaries=target/classes \
-                -Dsonar.java.libraries=target/*.jar \
-                -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
-            
-            
+#          run: |
+#            mvn clean install
+#
+#            mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+#                -Dsonar.projectKey=lkevenson_spring-petclinic-rest \
+#                -Dsonar.organization=lkevenson \
+#                -Dsonar.host.url=https://sonarcloud.io \
+#                -Dsonar.sources=src/main/java \
+#                -Dsonar.tests=src/test/java \
+#                -Dsonar.java.binaries=target/classes \
+#                -Dsonar.java.libraries=target/*.jar \
+#                -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+#
+#
 #            mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Pcoverage
 #          run:
 #            mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=lkevenson_spring-petclinic-rest
