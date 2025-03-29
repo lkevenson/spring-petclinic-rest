@@ -76,7 +76,7 @@ jobs:
 #                -Dsonar.java.libraries=target/*.jar \
 #                -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
           run: |
-            mvn -B verify org.jacoco:jacoco-maven-plugin:prepare-agent install -Pcoverage
+            mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Pcoverage
             mvn -B sonar:sonar \
                 -Dsonar.projectKey=lkevenson_spring-petclinic-rest \
                 -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
