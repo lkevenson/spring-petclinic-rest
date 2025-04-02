@@ -1,0 +1,26 @@
+name: Coveralls
+
+on: [push, pull_request]
+
+jobs:
+  coveralls:
+    if: github.repository_owner == 'lkevenson'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          cache: maven
+          distribution: temurin
+          java-version: 17
+
+      - name: Run tests and generate coverage report
+        run: mvn clean verify jacoco:report
+
+      - name: Report Coverage to Coveralls
+        run: mvn coveralls:report -DrepoToken=${{ secrets.COVERALLS_REPO_TOKEN }} -Dcoveralls.repository=github.com/lkevenson/spring-petclinic-rest
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
