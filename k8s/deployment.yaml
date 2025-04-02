@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: petclinic-rest
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: petclinic-rest
+  template:
+    metadata:
+      labels:
+        app: petclinic-rest
+    spec:
+      containers:
+        - name: petclinic-rest
+          image: ${{ secrets.ACR_LOGIN_SERVER }}/petclinic-rest:latest
+          ports:
+            - containerPort: 9966
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "test"
