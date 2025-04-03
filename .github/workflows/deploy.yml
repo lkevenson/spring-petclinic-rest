@@ -48,4 +48,5 @@ jobs:
 
       - name: Get Service URL
         run: |
+          kubectl apply -f k8s/service.yaml
           kubectl get service petclinic-rest-service -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
