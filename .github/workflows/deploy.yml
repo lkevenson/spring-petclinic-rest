@@ -28,7 +28,7 @@ jobs:
       # 🔹 Construire l'image Docker
       - name: Build Docker image
         run: |
-          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/petclinic-rest:latest .
+          docker build -t ${{ secrets.docker build -t petclinic-rest:latest . }}/petclinic-rest:latest .
 
       # 🔹 Pousser l'image sur ACR
       - name: Push Docker image to ACR
@@ -45,3 +45,7 @@ jobs:
         run: |
           kubectl apply -f k8s/deployment.yaml
           kubectl rollout status deployment/petclinic-rest
+
+      - name: Get Service URL
+        run: |
+          kubectl get service petclinic-rest-service -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
