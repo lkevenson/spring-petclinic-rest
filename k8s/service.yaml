@@ -10,3 +10,5 @@ spec:
       port: 80
       targetPort: 9966  # Correspond au port du conteneur
   type: LoadBalancer
+
+

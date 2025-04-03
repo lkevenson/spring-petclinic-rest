@@ -21,3 +21,5 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: "test"
+      imagePullSecrets:
+        - name: acr-secret
