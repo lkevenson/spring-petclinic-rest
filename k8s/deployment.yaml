@@ -30,6 +30,6 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: mysql-secret
-                key: MYSQL_PASSWORD
+                key: MYSQL_PASS
       imagePullSecrets:
         - name: acr-secret
