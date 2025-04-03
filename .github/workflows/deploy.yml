@@ -1,0 +1,79 @@
+name: Deploy to AKS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+
+      # 🔹 Récupérer le code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 🔹 Se connecter à Azure
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # 🔹 Se connecter à Azure Container Registry (ACR)
+      - name: Login to ACR
+        run: |
+          echo "${{ secrets.ACR_PASSWORD }}" | docker login ${{ secrets.ACR_LOGIN_SERVER }} -u ${{ secrets.ACR_USERNAME }} --password-stdin
+
+      # 🔹 Construire l'image Docker
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/petclinic-rest:latest .
+
+      # 🔹 Pousser l'image sur ACR
+      - name: Push Docker image to ACR
+        run: |
+          docker push ${{ secrets.ACR_LOGIN_SERVER }}/petclinic-rest:latest
+
+      # 🔹 Configurer kubectl pour se connecter à AKS
+      - name: Set up kubectl
+        run: |
+          az aks get-credentials --resource-group ${{ secrets.AKS_RESOURCE_GROUP }} --name ${{ secrets.AKS_CLUSTER_NAME }}
+
+      # Deploy MySQL first
+      - name: Deploy MySQL
+        run: |
+          kubectl apply -f k8s/mysql-deployment.yaml
+          kubectl apply -f k8s/mysql-service.yaml
+          kubectl rollout status deployment/petclinic-mysql --timeout=180s
+
+      # Wait for MySQL to be ready
+      - name: Wait for MySQL
+        run: |
+          kubectl wait --for=condition=ready pod -l app=petclinic-mysql --timeout=300s
+
+      # Deploy PetClinic application
+      - name: Deploy PetClinic
+        run: |
+          kubectl apply -f k8s/deployment.yaml
+          kubectl rollout status deployment/petclinic-rest
+
+      # Expose PetClinic service
+      - name: Deploy PetClinic Service
+        run: |
+          kubectl apply -f k8s/service.yaml
+          kubectl get service petclinic-rest -o jsonpath='{.status.loadBalancer.ingress[0].ip}'   
+
+
+#      # 🔹 Déployer sur Kubernetes
+#      - name: Deploy to AKS
+#        run: |
+#          kubectl apply -f k8s/deployment.yaml
+#          kubectl rollout status deployment/petclinic-rest
+#
+#      - name: Get Service URL for petclinic-rest
+#        run: |
+#          kubectl apply -f k8s/service.yaml
+#          kubectl get service petclinic-rest -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+
+
