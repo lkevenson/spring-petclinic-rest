@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: petclinic-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod  # Requires cert-manager
+spec:
+  tls:
+    - hosts:
+        - petclinic.syntonetechnology.com  # Replace with your domain
+      secretName: petclinic-tls
+  rules:
+    - host: petclinic.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: petclinic-rest
+                port:
+                  number: 80
