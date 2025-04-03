@@ -56,13 +56,13 @@ jobs:
       - name: Deploy PetClinic
         run: |
           kubectl apply -f k8s/deployment.yaml
-          kubectl rollout status deployment/petclinic-rest --timeout=180s
+          kubectl rollout status deployment/petclinic-rest
 
       # Expose PetClinic service
       - name: Deploy PetClinic Service
         run: |
           kubectl apply -f k8s/service.yaml
-          echo "Application URL: $(kubectl get service petclinic-rest -o jsonpath='{.status.loadBalancer.ingress[0].ip}')"   
+          kubectl get service petclinic-rest -o jsonpath='{.status.loadBalancer.ingress[0].ip}'   
 
 
 #      # 🔹 Déployer sur Kubernetes
