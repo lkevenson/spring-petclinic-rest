@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: petclinic-rest
-          image: ${{ secrets.ACR_LOGIN_SERVER }}/petclinic-rest:latest
+          image: kleger.azurecr.io/petclinic-rest:latest
           ports:
             - containerPort: 9966
           env:
