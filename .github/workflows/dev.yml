@@ -12,22 +12,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Install dependencies with conflict resolution
+      # Install only essential dependencies
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          # Remove existing containerd if present
-          sudo apt-get remove -y containerd || true
-          # Clean up package cache
-          sudo apt-get autoremove -y
-          sudo apt-get clean
-          # Install required packages with explicit containerd.io
+          # Install only what we actually need
           sudo apt-get install -y \
-              containerd.io \
               docker.io \
               conntrack \
-              docker-buildx-plugin
-          sudo usermod -aG docker $USER
+              curl
+          sudo usermod -aG docker $USER || true
 
       # Set up Minikube
       - name: Start Minikube
@@ -40,8 +34,7 @@ jobs:
           minikube start --driver=docker
           
           # Configure Docker environment
-          echo "$(minikube docker-env)" > docker-env.sh
-          source docker-env.sh
+          eval $(minikube docker-env)
           
           # Verify setup
           kubectl config use-context minikube
@@ -57,25 +50,21 @@ jobs:
         run: |
           minikube image load petclinic-rest:dev
 
-      # Deploy MySQL (dev version)
+      # Deploy MySQL
       - name: Deploy MySQL (Dev)
         run: |
           kubectl apply -f k8s/dev/mysql/deployment.yaml
           kubectl apply -f k8s/dev/mysql/service.yaml
           kubectl rollout status deployment/petclinic-mysql --timeout=180s
-
-      # Wait for MySQL to be ready
-      - name: Wait for MySQL
-        run: |
           kubectl wait --for=condition=ready pod -l app=petclinic-mysql --timeout=300s
 
-      # Deploy PetClinic application
+      # Deploy application
       - name: Deploy PetClinic (Dev)
         run: |
           kubectl apply -f k8s/dev/deployment.yaml
           kubectl rollout status deployment/petclinic-rest --timeout=180s
 
-      # Expose service and get URL
+      # Expose service
       - name: Expose PetClinic Service
         run: |
           kubectl apply -f k8s/dev/service.yaml
