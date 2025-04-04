@@ -12,17 +12,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Install only essential dependencies
       - name: Install system dependencies
         run: |
           sudo apt-get update -qq
-        # Ensure no conflicting containerd is present
           sudo apt-get remove -y containerd || true  
-        # Install critical dependencies  
           sudo apt-get install -y docker.io conntrack curl  
-        # Fix Docker permissions (ignore errors in CI)  
           sudo usermod -aG docker $USER || true  
-        # Verify Docker is functional  
           docker --version
 
       # Set up Minikube
