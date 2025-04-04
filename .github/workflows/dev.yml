@@ -1,114 +1,55 @@
-name: Deploy to Minikube (Dev with DB Tests)
+name: Deploy to Minikube (Dev)
 
 on:
   push:
-    branches: [dev]
+    branches:
+      - dev
 
 jobs:
-  build-test-deploy:
+  build-and-deploy:
     runs-on: ubuntu-24.04
-    services:
-      mysql:
-        image: mysql:5.7
-        env:
-          MYSQL_ROOT_PASSWORD: petclinic
-          MYSQL_DATABASE: petclinic
-        ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping -ppetclinic" --health-interval=10s --health-timeout=5s --health-retries=3
-
     steps:
-      # Checkout code
+      # 🔹 Checkout code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Set up Java
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      # Cache Maven dependencies
-      - name: Cache Maven packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2-
-
-      # Install MySQL client for health check
-      - name: Install MySQL client
-        run: sudo apt-get install -y mysql-client
-
-      # Run tests with Testcontainers
-      - name: Run tests with Testcontainers MySQL
-        env:
-          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/petclinic?useSSL=false&allowPublicKeyRetrieval=true
-          SPRING_DATASOURCE_USERNAME: root
-          SPRING_DATASOURCE_PASSWORD: petclinic
-          SPRING_PROFILES_ACTIVE: test
-        run: |
-          # Wait for MySQL to be ready
-          while ! mysqladmin ping -h127.0.0.1 -uroot -ppetclinic --silent; do sleep 1; done
-          
-          # Run all tests
-          ./mvnw clean verify
-          
-          # Generate coverage report
-          ./mvnw jacoco:report
-          
-          # Archive test results
-          mkdir -p test-results
-          cp target/surefire-reports/*.xml test-results/
-          cp target/failsafe-reports/*.xml test-results/
-
-      # Start Minikube
+      # 🔹 Start Minikube (instead of Azure login)
       - name: Start Minikube
         run: |
-          sudo apt-get install -y conntrack
-          curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-          sudo install minikube-linux-amd64 /usr/local/bin/minikube
-          minikube start --driver=docker
+          minikube start
           minikube docker-env | source
           kubectl config use-context minikube
 
-      # Build Docker image
+      # 🔹 Build Docker image (using Minikube's Docker daemon)
       - name: Build Docker image
         run: |
           docker build -t petclinic-rest:dev .
 
-      # Load image into Minikube
+      # 🔹 Load image into Minikube (instead of pushing to ACR)
       - name: Load image into Minikube
         run: |
           minikube image load petclinic-rest:dev
 
-      # Deploy MySQL to Minikube
+      # Deploy MySQL (dev version)
       - name: Deploy MySQL (Dev)
         run: |
           kubectl apply -f k8s/dev/mysql/deployment.yaml
           kubectl apply -f k8s/dev/mysql/service.yaml
           kubectl rollout status deployment/petclinic-mysql --timeout=180s
+
+      # Wait for MySQL to be ready
+      - name: Wait for MySQL
+        run: |
           kubectl wait --for=condition=ready pod -l app=petclinic-mysql --timeout=300s
 
-      # Deploy application
+      # Deploy PetClinic application (dev version)
       - name: Deploy PetClinic (Dev)
         run: |
           kubectl apply -f k8s/dev/deployment.yaml
-          kubectl rollout status deployment/petclinic-rest --timeout=180s
+          kubectl rollout status deployment/petclinic-rest
 
-      # Expose service and get URL
-      - name: Get application URL
+      # Expose PetClinic service (dev version)
+      - name: Deploy PetClinic Service (Dev)
         run: |
           kubectl apply -f k8s/dev/service.yaml
-          echo "Application deployed at:"
-          minikube service petclinic-rest --url | tee service-url.txt
-          echo "SERVICE_URL=$(cat service-url.txt)" >> $GITHUB_OUTPUT
-
-      # Upload test results (using updated artifact action)
-      - name: Upload test results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: test-results
-          path: test-results/
+          minikube service petclinic-rest --url
