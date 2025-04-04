@@ -14,11 +14,30 @@ jobs:
 
       - name: Install system dependencies
         run: |
+          # Update package lists quietly
           sudo apt-get update -qq
-          sudo apt-get remove -y containerd || true  
-          sudo apt-get install -y docker.io conntrack curl  
-          sudo usermod -aG docker $USER || true  
+          
+          # Resolve containerd conflicts
+          sudo apt-get remove -y containerd docker.io || true
+          sudo apt-get autoremove -y
+          
+          # Install essential packages (ignore dependency errors)
+          sudo apt-get install -y \
+              docker-ce \
+              docker-ce-cli \
+              containerd.io \
+              conntrack \
+              curl || \
+              sudo apt-get install -y docker.io conntrack curl
+          
+          # Configure Docker permissions (suppress errors in CI)
+          sudo usermod -aG docker $USER || true
+          sudo systemctl enable --now docker || true
+          
+          # Verify installations
           docker --version
+          curl --version
+          conntrack --version || echo "conntrack check failed (may still work)"
 
       # Set up Minikube
       - name: Start Minikube
