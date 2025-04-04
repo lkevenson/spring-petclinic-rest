@@ -12,11 +12,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Install dependencies
+      # Install dependencies with conflict resolution
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y docker.io conntrack
+          # Remove existing containerd if present
+          sudo apt-get remove -y containerd || true
+          # Clean up package cache
+          sudo apt-get autoremove -y
+          sudo apt-get clean
+          # Install required packages with explicit containerd.io
+          sudo apt-get install -y \
+              containerd.io \
+              docker.io \
+              conntrack \
+              docker-buildx-plugin
+          sudo usermod -aG docker $USER
 
       # Set up Minikube
       - name: Start Minikube
@@ -25,7 +36,7 @@ jobs:
           curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
           sudo install minikube-linux-amd64 /usr/local/bin/minikube
           
-          # Start Minikube cluster
+          # Start Minikube cluster with Docker driver
           minikube start --driver=docker
           
           # Configure Docker environment
