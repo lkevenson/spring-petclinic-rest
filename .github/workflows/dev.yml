@@ -2,30 +2,46 @@ name: Deploy to Minikube (Dev)
 
 on:
   push:
-    branches:
-      - dev
+    branches: [dev]
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-24.04
     steps:
-      # 🔹 Checkout code
+      # Checkout code
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 🔹 Start Minikube (instead of Azure login)
+      # Install dependencies
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker.io conntrack
+
+      # Set up Minikube
       - name: Start Minikube
         run: |
-          minikube start
-          minikube docker-env | source
+          # Install latest Minikube
+          curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+          sudo install minikube-linux-amd64 /usr/local/bin/minikube
+          
+          # Start Minikube cluster
+          minikube start --driver=docker
+          
+          # Configure Docker environment
+          echo "$(minikube docker-env)" > docker-env.sh
+          source docker-env.sh
+          
+          # Verify setup
           kubectl config use-context minikube
+          kubectl cluster-info
 
-      # 🔹 Build Docker image (using Minikube's Docker daemon)
+      # Build Docker image
       - name: Build Docker image
         run: |
           docker build -t petclinic-rest:dev .
 
-      # 🔹 Load image into Minikube (instead of pushing to ACR)
+      # Load image into Minikube
       - name: Load image into Minikube
         run: |
           minikube image load petclinic-rest:dev
@@ -42,14 +58,15 @@ jobs:
         run: |
           kubectl wait --for=condition=ready pod -l app=petclinic-mysql --timeout=300s
 
-      # Deploy PetClinic application (dev version)
+      # Deploy PetClinic application
       - name: Deploy PetClinic (Dev)
         run: |
           kubectl apply -f k8s/dev/deployment.yaml
-          kubectl rollout status deployment/petclinic-rest
+          kubectl rollout status deployment/petclinic-rest --timeout=180s
 
-      # Expose PetClinic service (dev version)
-      - name: Deploy PetClinic Service (Dev)
+      # Expose service and get URL
+      - name: Expose PetClinic Service
         run: |
           kubectl apply -f k8s/dev/service.yaml
+          echo "Application URL:"
           minikube service petclinic-rest --url
