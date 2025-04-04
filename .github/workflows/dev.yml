@@ -1,0 +1,88 @@
+name: Deploy to Minikube (Dev)
+
+on:
+  push:
+    branches: [dev]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-24.04
+    steps:
+      # Checkout code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          # Update package lists quietly
+          sudo apt-get update -qq
+          
+          # Resolve containerd conflicts
+          sudo apt-get remove -y containerd docker.io || true
+          sudo apt-get autoremove -y
+          
+          # Install essential packages (ignore dependency errors)
+          sudo apt-get install -y \
+              docker-ce \
+              docker-ce-cli \
+              containerd.io \
+              conntrack \
+              curl || \
+              sudo apt-get install -y docker.io conntrack curl
+          
+          # Configure Docker permissions (suppress errors in CI)
+          sudo usermod -aG docker $USER || true
+          sudo systemctl enable --now docker || true
+          
+          # Verify installations
+          docker --version
+          curl --version
+          conntrack --version || echo "conntrack check failed (may still work)"
+
+      # Set up Minikube
+      - name: Start Minikube
+        run: |
+          # Install latest Minikube
+          curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+          sudo install minikube-linux-amd64 /usr/local/bin/minikube
+          
+          # Start Minikube cluster with Docker driver
+          minikube start --driver=docker
+          
+          # Configure Docker environment
+          eval $(minikube docker-env)
+          
+          # Verify setup
+          kubectl config use-context minikube
+          kubectl cluster-info
+
+      # Build Docker image
+      - name: Build Docker image
+        run: |
+          docker build -t petclinic-rest:dev .
+
+      # Load image into Minikube
+      - name: Load image into Minikube
+        run: |
+          minikube image load petclinic-rest:dev
+
+      # Deploy MySQL
+      - name: Deploy MySQL (Dev)
+        run: |
+          kubectl apply -f k8s/dev/mysql/deployment.yaml
+          kubectl apply -f k8s/dev/mysql/service.yaml
+          kubectl rollout status deployment/petclinic-mysql --timeout=180s
+          kubectl wait --for=condition=ready pod -l app=petclinic-mysql --timeout=300s
+
+      # Deploy application
+      - name: Deploy PetClinic (Dev)
+        run: |
+          kubectl apply -f k8s/dev/deployment.yaml
+          kubectl rollout status deployment/petclinic-rest --timeout=180s
+
+      # Expose service
+      - name: Expose PetClinic Service
+        run: |
+          kubectl apply -f k8s/dev/service.yaml
+          echo "Application URL:"
+          minikube service petclinic-rest --url

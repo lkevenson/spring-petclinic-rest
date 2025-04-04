@@ -35,7 +35,7 @@ jobs:
         run: |
           docker push ${{ secrets.ACR_LOGIN_SERVER }}/petclinic-rest:latest
 
-      # 🔹 Configurer kubectl pour se connecter à AKS
+      #  Configurer kubectl pour se connecter à AKS
       - name: Set up kubectl
         run: |
           az aks get-credentials --resource-group ${{ secrets.AKS_RESOURCE_GROUP }} --name ${{ secrets.AKS_CLUSTER_NAME }}
@@ -43,8 +43,8 @@ jobs:
       # Deploy MySQL first
       - name: Deploy MySQL
         run: |
-          kubectl apply -f k8s/mysql-deployment.yaml
-          kubectl apply -f k8s/mysql-service.yaml
+          kubectl apply -f k8s/prod/mysql/deployment.yaml
+          kubectl apply -f k8s/prod/mysql/service.yaml
           kubectl rollout status deployment/petclinic-mysql --timeout=180s
 
       # Wait for MySQL to be ready
@@ -55,25 +55,13 @@ jobs:
       # Deploy PetClinic application
       - name: Deploy PetClinic
         run: |
-          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/prod/deployment.yaml
           kubectl rollout status deployment/petclinic-rest
 
       # Expose PetClinic service
       - name: Deploy PetClinic Service
         run: |
-          kubectl apply -f k8s/service.yaml
+          kubectl apply -f k8s/prod/service.yaml
           kubectl get service petclinic-rest -o jsonpath='{.status.loadBalancer.ingress[0].ip}'   
-
-
-#      # 🔹 Déployer sur Kubernetes
-#      - name: Deploy to AKS
-#        run: |
-#          kubectl apply -f k8s/deployment.yaml
-#          kubectl rollout status deployment/petclinic-rest
-#
-#      - name: Get Service URL for petclinic-rest
-#        run: |
-#          kubectl apply -f k8s/service.yaml
-#          kubectl get service petclinic-rest -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
 
 
