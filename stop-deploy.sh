@@ -31,8 +31,6 @@ minikube stop
 #To get more information about why the container
 # kubectl logs pod-name
 
-
-#minikube service petclinic-mysql --url
 # kubectl describe pod pod-name
 #kubectl logs pod-name
 
